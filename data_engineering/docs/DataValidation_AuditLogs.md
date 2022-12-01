@@ -40,7 +40,7 @@ class ConfigsRB:
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
-from data_engineering import GetSecrets, GetConnectionsCCB, DataValidation, AuditLogs, UnpackVariables
+from data_engineering import GetSecrets, DataValidation, AuditLogs, UnpackVariables
 from de_configs_rb import ConfigsRB # replace with your own config
 
 args = getResolvedOptions(sys.argv, [
