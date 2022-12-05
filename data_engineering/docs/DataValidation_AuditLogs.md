@@ -28,8 +28,8 @@ class ConfigsRB:
         self.project = "collection_intelligence"
         self.dataset = "red_bill_customers"
         self.bucket_name = "apdu-data"
-        self.audit_job_path = f"s3a://{self.bucket_name}/monitoring/audit_job/project={self.project}/dataset={self.dataset}/du_name={du_name}"
-        self.audit_compare_path = f"s3a://{self.bucket_name}/monitoring/audit_compare/project={self.project}/dataset={self.dataset}/du_name={du_name}"
+        self.audit_job_path = f"s3a://{self.bucket_name}/monitoring/audit_job"
+        self.audit_compare_path = f"s3a://{self.bucket_name}/monitoring/audit_compare"
         self.threshold = "0"
 
 ``` 
@@ -50,6 +50,11 @@ args = getResolvedOptions(sys.argv, [
 sc = SparkContext()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
+
+# get job parameters
+job_name = args["JOB_NAME"]
+job_run_id = args["JOB_RUN_ID"]
+du_name = args["DU_NAME"]
 
 # initialize modules - only add when applicable
 ci = ConfigsCI(du_name)
@@ -88,6 +93,10 @@ tgt_kwargs = {
     "spark_context"     : sc,
     "spark"             : spark        
 }
+
+# unpack variables
+src = UnpackVariables(**src_kwargs)
+tgt = UnpackVariables(**tgt_kwargs)
 ```
 5. Use functions below to get the data count:
 ``` Python
@@ -149,8 +158,8 @@ al.audit_job('failed',**audit_failed_kwargs)
 ## References
 1. S3 Path for Audit Tables
 ```
-s3://apdu-data/monitoring/audit_compare/project=<project_name>/dataset=<dataset_name>/du_name=<du_name>
-s3://apdu-data/monitoring/audit_job/project=<project_name>/dataset=<dataset_name>/du_name=<du_name>
+s3://apdu-data/monitoring/audit_compare
+s3://apdu-data/monitoring/audit_job
 ```
 2. Supported connection_node:
 ```
