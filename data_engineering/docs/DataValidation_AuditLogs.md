@@ -1,6 +1,6 @@
 # Data Engineering Python Modules: Data Validation & Audit Logs
 ## Quick Start
-
+A quick guide on how to implement Data Validation & Audit Logs Python Modules from Data Engineering to jobs. These modules are useful for validation of source and target count, and for logging of job execution status and comparison of data count.
 ### Requirements:
 1. Create a config file by creating a python job in aws glue and save it to s3 path: `s3://apdu-data/aws_glue/data_engineering/`
 <br> Below is a sample python config containing the main parameters that are needed:
@@ -120,6 +120,7 @@ audit_kwargs = {
     "spark"             : spark
 }
 
+# initialize job_status
 job_status = None
 try:    
     # get source count 
@@ -158,6 +159,29 @@ finally:
     al.audit_compare(**audit_kwargs)
 ```
 5. Make sure to add crawler `apdu_s3_monitoring_crawler` after glue job in workflow.
+
+## Monitoring Audit Tables using AWS Athena Views
+
+1. audit_latest_vw - Shows job details including job status, source/target data count of latest run per project, dataset & pipeline. See SQL script below:
+```SQL
+SELECT * FROM "apdu_s3_monitoring_db"."audit_latest_vw"; 
+```
+Sample result:
+![image](../images/DataValidation_AuditLogs-Athena_1.png)
+
+2. audit_summary_vw - Shows summary of jobs including Success Rate and Data Count Variance per project. See SQL script below:
+```SQL
+SELECT * FROM "apdu_s3_monitoring_db"."audit_summary_vw"; 
+```
+Sample result:
+![image](../images/DataValidation_AuditLogs-Athena_2.png)
+
+3. audit_summary_dataset_vw - Shows summary of jobs including Success Rate and Data Count Variance per project & dataset. See SQL script below:
+```SQL
+SELECT * FROM "apdu_s3_monitoring_db"."audit_summary_dataset_vw"; 
+```
+Sample result:
+![image](../images/DataValidation_AuditLogs-Athena_3.png)
 
 ## References
 1. S3 Path for Audit Tables
