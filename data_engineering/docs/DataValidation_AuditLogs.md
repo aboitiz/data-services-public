@@ -57,7 +57,6 @@ job_run_id = args["JOB_RUN_ID"]
 du_name = args["DU_NAME"]
 
 # initialize modules - only add when applicable
-ci = ConfigsCI(du_name)
 rb = ConfigsRB(du_name)
 ss = GetSecrets(ci.platform_name).secrets
 st = GetSecrets(rb.platform_name).secrets
@@ -66,7 +65,7 @@ dv = DataValidation()
 al = AuditLogs()
 
 ```
-4. Below are the main keyword arguments that is needed for Data Validation:
+4. Below is a code snippet that is needed for Data Validation:
 ``` Python
 # initialize source parameters
 src_kwargs = {
@@ -122,27 +121,41 @@ audit_kwargs = {
 }
 
 job_status = None
-try:
-    # <your-code>
-    # get source count, can be placed before data ingestion
+try:    
+    # get source count 
     src_count = dv.get_count(**src_kwargs)
-
-    # get target count, can be placed after data ingestion
+    
+    #### <code for data ingestion> ####
+    
+    # get target count
     tgt_count = dv.get_count(**tgt_kwargs)
-
-    # validate
+    
+    #### <your code> ####
+    
+    # fail job if count variance > threshold 
     dv.validate_count(**audit_kwargs)
     
-    job_status = 'success'
-except:
-    job_status = 'failed'
-    raise
-finally:
-    job_status = 'failed' if job_status == None else job_status
-    al.audit_job(job_status,**audit_kwargs)
-    al.audit_compare(**audit_kwargs)
-
+    #### <your code> ####
     
+    # set status to success at the end of job
+    job_status = 'success'
+    
+except:
+    
+    # set status to failed if there's an error
+    job_status = 'failed'
+    
+    raise
+    
+finally:
+
+    job_status = 'failed' if job_status == None else job_status
+    
+    # log job status details to audit_job table
+    al.audit_job(job_status,**audit_kwargs)
+    
+    # log count compare details to audit_compare table
+    al.audit_compare(**audit_kwargs)
 ```
 5. Make sure to add crawler `apdu_s3_monitoring_crawler` after glue job in workflow.
 
