@@ -80,7 +80,6 @@ src_kwargs = {
     "spark"             : spark
 }
 
-
 # initialize target parameters
 tgt_kwargs = {
     "connection_node"   : rb.target_node,                    
@@ -97,18 +96,11 @@ tgt_kwargs = {
 # unpack variables
 src = UnpackVariables(**src_kwargs)
 tgt = UnpackVariables(**tgt_kwargs)
-```
-5. Use functions below to get the data count:
-``` Python
-# get source count, can be placed before data ingestion
-src_count = dv.get_count(**src_kwargs)
 
-# get target count, can be placed after data ingestion
-tgt_count = dv.get_count(**tgt_kwargs)
-```
+# initialize count
+src_count = 0
+tgt_count = 0
 
-6. Below are the main keyword arguments that is needed for Data Validation:
-``` Python
 # audit variables
 audit_kwargs = {
     "project"           : rb.project,
@@ -129,31 +121,30 @@ audit_kwargs = {
     "spark"             : spark
 }
 
-# audit variables when job failure
-audit_failed_kwargs = {
-    "project"           : rb.project,
-    "dataset"           : rb.dataset,
-    "du_name"           : du_name,
-    "job_name"          : job_name,
-    "job_run_id"        : job_run_id,
-    "audit_job_path"    : rb.audit_job_path,
-    "spark_context"     : sc,
-    "spark"             : spark
-}
+job_status = None
+try:
+    # <your-code>
+    # get source count, can be placed before data ingestion
+    src_count = dv.get_count(**src_kwargs)
+
+    # get target count, can be placed after data ingestion
+    tgt_count = dv.get_count(**tgt_kwargs)
+
+    # validate
+    dv.validate_count(**audit_kwargs)
+    
+    job_status = 'success'
+except:
+    job_status = 'failed'
+    raise
+finally:
+    job_status = 'failed' if job_status == None else job_status
+    al.audit_job(job_status,**audit_kwargs)
+    al.audit_compare(**audit_kwargs)
+
+    
 ```
-
-7. Use commands below to log audit jobs and audit compare:
-``` Python
-# insert compare data to audit table
-al.audit_compare(**audit_kwargs)
-
-# insert job state to audit table when success
-al.audit_job('success',**audit_kwargs)
-
-# insert job state when fail, should be added after except clause
-al.audit_job('failed',**audit_failed_kwargs)
-```
-8. Make sure to add crawler `apdu_s3_monitoring_crawler` after glue job in workflow.
+5. Make sure to add crawler `apdu_s3_monitoring_crawler` after glue job in workflow.
 
 ## References
 1. S3 Path for Audit Tables
