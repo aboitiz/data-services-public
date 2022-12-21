@@ -133,6 +133,10 @@ try:
     
     #### <your code> ####
     
+    # update count
+    audit_kwargs["source_count"]=src_count
+    audit_kwargs["target_count"]=tgt_count
+    
     # fail job if count variance > threshold 
     dv.validate_count(**audit_kwargs)
     
